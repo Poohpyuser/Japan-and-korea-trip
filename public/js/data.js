@@ -29,13 +29,40 @@ export const CITIES = {
 export const cityOptions = () => Object.entries(CITIES).map(([k, c]) => [k, `${c.name} ${c.country === 'JP' ? '🇯🇵' : '🇰🇷'}`]);
 
 export const CATS = {
-  sight: { label: 'Sights', icon: '⛩️' },
-  food: { label: 'Food', icon: '🍜' },
-  cafe: { label: 'Cafés', icon: '☕' },
-  shop: { label: 'Shopping', icon: '🛍️' },
-  stay: { label: 'Stay', icon: '🏨' },
-  other: { label: 'Other', icon: '📍' },
+  sight: { label: 'Sights', icon: '⛩️', color: '#3f7cb0' },
+  food: { label: 'Food', icon: '🍜', color: '#d9724a' },
+  cafe: { label: 'Cafés', icon: '☕', color: '#a9714b' },
+  shop: { label: 'Shopping', icon: '🛍️', color: '#c0558a' },
+  stay: { label: 'Stay', icon: '🏨', color: '#6b5bc4' },
+  other: { label: 'Other', icon: '📍', color: '#6b7a89' },
 };
+export const KIND_STYLE = {
+  transit: { icon: '🚆', color: '#2f8f83', label: 'Transit' },
+  note: { icon: '📝', color: '#e0a94e', label: 'Note' },
+};
+export const MOVES = {
+  walk: ['🚶', 'Walk'], subway: ['🚇', 'Subway'], bus: ['🚌', 'Bus'], tram: ['🚋', 'Tram'],
+  train: ['🚆', 'Train'], taxi: ['🚕', 'Taxi'], flight: ['✈️', 'Flight'], bike: ['🚲', 'Bike'],
+};
+
+// A 3-day Tokyo trip so a new user can try everything immediately.
+export function sampleTrip(start) {
+  const P = (name, local, cat, lat, lng, address) => ({ name, local, cat, lat, lng, address, country: 'JP', city: 'tokyo' });
+  const places = [
+    P('Hotel Gracery Shinjuku', 'ホテルグレイスリー新宿', 'stay', 35.6954, 139.7016, 'Kabukicho, Shinjuku, Tokyo'),
+    P('Senso-ji Temple', '浅草寺', 'sight', 35.7148, 139.7967, 'Asakusa, Taito, Tokyo'),
+    P('Tsukiji Outer Market', '築地場外市場', 'food', 35.6655, 139.7707, 'Tsukiji, Chuo, Tokyo'),
+    P('Meiji Jingu', '明治神宮', 'sight', 35.6764, 139.6993, 'Yoyogi, Shibuya, Tokyo'),
+    P('Ichiran Shibuya', '一蘭 渋谷店', 'food', 35.6591, 139.7006, 'Shibuya, Tokyo'),
+    P('Shibuya Sky', 'SHIBUYA SKY', 'sight', 35.6585, 139.7022, 'Shibuya Scramble Square, Tokyo'),
+    P('teamLab Planets', 'チームラボプラネッツ', 'sight', 35.6492, 139.7896, 'Toyosu, Koto, Tokyo'),
+  ];
+  return { places, plan: [
+    [0, '15:00', 0, 'subway', 'Check in and drop bags'], [0, '17:30', 4, 'subway', 'Dinner: solo-booth ramen'], [0, '19:30', 5, 'walk', 'Book the sunset slot ahead'],
+    [1, '08:30', 2, 'subway', 'Breakfast: tamagoyaki and seafood bowls'], [1, '11:00', 1, 'subway', 'Walk Nakamise street'], [1, '14:00', 6, 'subway', 'Timed ticket'],
+    [2, '09:00', 3, 'walk', 'Quiet forest walk'],
+  ] };
+}
 
 export const EMERGENCY = {
   JP: {
@@ -174,4 +201,3 @@ export const WIFI_PROGRAMS = [
   ] },
 ];
 
-export const ICONS = { plan: '🗓️', map: '🗺️', eat: '🍜', transit: '🚆', wifi: '📶', safety: '🛟', tools: '🧰' };

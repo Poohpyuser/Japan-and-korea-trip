@@ -6,7 +6,7 @@
 import { h, clear, field, input, select, modal, confirmBox, toast, overpass, elCoords, elName, elLocalName, distKm, fmtDist, links } from './util.js';
 import * as S from './store.js';
 import { CATS, CITIES } from './data.js';
-import { centerPicker, resolveCenter } from './shared.js';
+import { centerPicker, resolveCenter, layers, bump } from './shared.js';
 import { placePicker } from './util.js';
 
 const KINDS = {
@@ -29,12 +29,12 @@ export function renderEat(root) {
   root.append(
     h('div.seg', [['list', `❤️ My food list (${S.get().places.filter((p) => p.cat === 'food' || p.cat === 'cafe').length})`], ['find', '🔎 Find nearby']].map(([k, l]) =>
       h('button', { class: tab === k ? 'on' : '', onclick: () => { tab = k; sessionStorage.setItem('eatTab', k); S.save(); } }, l))),
-    tab === 'find' ? finder() : foodList(),
+    tab === 'find' ? finderPanel() : foodList(),
   );
 }
 
 // ---------- finder ----------
-function finder() {
+export function finderPanel() {
   const out = h('div.stack');
   const cp = centerPicker();
   const kindSel = select(Object.entries(KINDS).map(([k, v]) => [k, v[0]]), kind, { onchange: (e) => { kind = e.target.value; } });
@@ -54,6 +54,8 @@ function finder() {
         const t = e.tags;
         return { id: e.type + e.id, name: elName(t), local: elLocalName(t), cuisine: (t.cuisine || '').replace(/;/g, ', ').replace(/_/g, ' '), hours: t.opening_hours, lat: p.lat, lng: p.lng, km: distKm(c, p), country: c.country, amenity: t.amenity, phone: t.phone || t['contact:phone'], web: t.website, city: cp.value };
       }).sort((a, b) => a.km - b.km);
+      layers.food = results.slice(0, 60).map((r) => ({ lat: r.lat, lng: r.lng, name: r.name, local: r.local, cuisine: r.cuisine }));
+      bump();
       paint(c);
     } catch (e) {
       clear(out).append(h('p.warn', `Couldn’t load places (${e.message}). Check your connection, or search by name below.`));

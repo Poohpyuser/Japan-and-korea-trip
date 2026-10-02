@@ -1,7 +1,12 @@
-# Static site: no build step. Netlify just serves this folder over HTTPS
-# (HTTPS is required for the service worker, "install to home screen" and GPS).
+# The app is plain static files in public/ (no build step). One serverless function (netlify/functions/ai.mjs)
+# powers the AI features and keeps your Anthropic API key off the phone. HTTPS is required for the
+# service worker, "install to home screen" and GPS, and Netlify provides it automatically.
 [build]
-  publish = "."
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
 
 [[headers]]
   for = "/*"

@@ -7,7 +7,7 @@ import { h, clear, fetchJSON, timeAgo, distKm, fmtDist, links, toast, overpass, 
 import * as S from './store.js';
 import { CITIES, EMERGENCY, PREPAREDNESS, PHRASES } from './data.js';
 import { forecast, wxInfo } from './plan.js';
-import { centerPicker, resolveCenter, layers } from './shared.js';
+import { centerPicker, resolveCenter, layers, bump as layersChanged } from './shared.js';
 
 // ---------- data ----------
 const SHINDO = { 10: '1', 20: '2', 30: '3', 40: '4', 45: '5−', 50: '5+', 55: '6−', 60: '6+', 70: '7' };
@@ -136,6 +136,7 @@ export async function renderSafety(root) {
         h('b', `M${e.mag.toFixed(1)}`), ` ${e.place} · ${timeAgo(e.time)} · ${fmtDist(distKm(city, e))} from ${city.name}`,
         e.tsunami ? ' · 🌊 tsunami flag' : ''))));
       layers.quakes = strong.map((e) => ({ lat: e.lat, lng: e.lng, mag: e.mag, place: e.place, time: e.time }));
+      layersChanged();
       quakeBox.append(h('p.muted.small', 'Magnitude ≠ how strongly you’d feel it: depth and distance matter. For official intensity and tsunami info use the links below.'));
     }
 
@@ -187,6 +188,7 @@ function nearby(out) {
       const rows = els.map((e) => ({ e, p: elCoords(e) })).filter((x) => x.p).map(({ e, p }) => ({ name: elName(e.tags) || SPOTS[spotKind][0].replace(/^\S+\s/, ''), lat: p.lat, lng: p.lng, km: distKm(c, p), phone: e.tags.phone || e.tags['contact:phone'], hours: e.tags.opening_hours, er: e.tags.emergency === 'yes' }))
         .sort((a, b) => a.km - b.km).slice(0, 15);
       layers.safety = rows.map((r) => ({ lat: r.lat, lng: r.lng, name: r.name, kind: spotKind }));
+      layersChanged();
       clear(out);
       if (!rows.length) out.append(h('p.muted', 'Nothing mapped within 4 km. In an emergency call 119 (Japan & Korea).'));
       rows.forEach((r) => out.append(h('article.card.place',

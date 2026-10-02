@@ -6,8 +6,10 @@ export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 // h('div.card', {onclick}, 'text', child) -> element. Text is always inserted as text nodes (no innerHTML),
 // which matters because place names come from OpenStreetMap and from the user.
 export function h(tag, attrs, ...kids) {
-  const [name, ...classes] = tag.split('.');
+  const [head, ...classes] = tag.split('.');
+  const [name, id] = head.split('#');
   const el = document.createElement(name || 'div');
+  if (id) el.id = id;
   if (classes.length) el.className = classes.join(' ');
   if (attrs && (typeof attrs !== 'object' || attrs instanceof Node || Array.isArray(attrs))) {
     kids.unshift(attrs);
@@ -28,6 +30,30 @@ export function h(tag, attrs, ...kids) {
   }
   return el;
 }
+
+// Downscale a photo/screenshot in the browser before it is stored or sent to the AI (keeps storage + uploads small).
+export function resizeImage(file, maxDim = 1280, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not process image'))), 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Not a readable image')); };
+    img.src = url;
+  });
+}
+export const blobToBase64 = (blob) => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(String(r.result).split(',')[1]);
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(blob);
+});
 
 export const clear = (el) => { el.replaceChildren(); return el; };
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -162,9 +188,9 @@ export function modal(title, body, actions = []) {
   dlg.append(
     h('header', h('h3', title), h('button.icon-btn', { 'aria-label': 'Close', onclick: close }, '✕')),
     h('div.modal-body', body),
-    actions.length ? h('footer', actions.map((a) => h(`button.btn${a.primary ? '.primary' : ''}${a.danger ? '.danger' : ''}`, {
+    actions.length ? h('footer', actions.filter(Boolean).map((a) => h(`button.btn${a.primary ? '.primary' : ''}${a.danger ? '.danger' : ''}`, {
       onclick: async () => { if ((await a.onclick?.()) !== false) close(); },
-    }, a.label))) : null,
+    }, a.label))) : h('span'),
   );
   dlg.addEventListener('cancel', () => dlg.remove());
   dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });

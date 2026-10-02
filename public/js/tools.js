@@ -1,7 +1,9 @@
 // Tools tab: budget & currency, packing list, survival phrases, settings, backup.
 import { h, clear, field, input, select, modal, confirmBox, toast, fetchJSON, uid, todayISO, fmtDate, download, timeAgo } from './util.js';
 import * as S from './store.js';
-import { PHRASES, DEFAULT_PACKING, ENTRY_LINKS, CITIES } from './data.js';
+import { PHRASES, ENTRY_LINKS, CITIES } from './data.js';
+import { getPass, setPass } from './ai.js';
+import { icon } from './icons.js';
 
 const CURRENCIES = ['JPY', 'KRW', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NZD', 'SGD', 'PHP', 'HKD', 'CNY', 'TWD', 'THB', 'MYR', 'IDR', 'INR', 'AED', 'CHF', 'MXN', 'BRL'];
 const EXP_CATS = { food: '🍜 Food', transport: '🚆 Transport', stay: '🏨 Stay', shop: '🛍️ Shopping', fun: '🎟️ Activities', other: '📦 Other' };
@@ -151,12 +153,18 @@ function settings() {
       field('Emergency contact (name + phone)', input({ type: 'text', ...bind(e, 'contact') })),
       field('Your embassy (name + phone)', input({ type: 'text', ...bind(e, 'embassy') }))),
     hotels.length ? h('section.card', h('h3', 'Where you’re staying'), hotels) : null,
+    h('section.card', h('h3', icon('ai', 18), ' AI assistant'),
+      h('p.muted.small', 'Needed only if the site owner set APP_PASSCODE in Netlify. Stored on this device.'),
+      field('AI passcode', input({ type: 'password', autocomplete: 'off', value: getPass(), oninput: (ev) => setPass(ev.target.value.trim()) }))),
+    h('section.card', h('h3', '⏰ Alarms'),
+      h('p.muted.small', 'Stop alarms ring (sound + banner + notification) while the app is open. For alarms when your phone is locked, use the Calendar button on a stop: your phone’s calendar will alert you.'),
+      h('button.btn', { onclick: async () => { if (!window.Notification) return toast('Notifications aren’t supported in this browser'); toast((await Notification.requestPermission()) === 'granted' ? 'Notifications enabled' : 'Notifications blocked'); } }, 'Enable notifications')),
     h('section.card', h('h3', 'Backup & sync'),
-      h('p.muted.small', 'There is no account or server: your data lives in this browser. Back it up before clearing browser data, or to move between phones. To share the itinerary with your sister use Plan → Share.'),
+      h('p.muted.small', 'There is no account: your trips live in this browser. Back up before clearing browser data or switching phones (attached files stay on the device and are not in the backup). To share one trip with your sister use Plan → Share.'),
       h('div.row.wrap',
-        h('button.btn', { onclick: () => download(`trip-backup-${todayISO()}.json`, JSON.stringify(st, null, 1)) }, '⬇ Export backup'),
+        h('button.btn', { onclick: () => download(`trips-backup-${todayISO()}.json`, JSON.stringify(S.exportState(), null, 1)) }, '⬇ Export backup'),
         h('button.btn', { onclick: () => fileInp.click() }, '⬆ Import backup'), fileInp,
-        h('button.btn.danger', { onclick: async () => { if (await confirmBox('This permanently erases your itinerary, places, expenses and settings on this device.', 'Erase everything')) { localStorage.clear(); location.reload(); } } }, 'Erase all data'))),
+        h('button.btn.danger', { onclick: async () => { if (await confirmBox('This permanently erases your itinerary, places, expenses and settings on this device.', 'Erase everything')) { localStorage.clear(); indexedDB.deleteDatabase('trip-files'); location.reload(); } } }, 'Erase all data'))),
     h('section.card', h('h3', 'Install on your phone'), h('p', 'iPhone: Safari → Share → Add to Home Screen. Android: Chrome → ⋮ → Install app. Once installed it opens full-screen and keeps working offline.')));
 }
 
@@ -166,8 +174,8 @@ function importFile(ev) {
   f.text().then(async (t) => {
     try {
       const data = JSON.parse(t);
-      if (data.v !== 1 || !Array.isArray(data.days)) throw new Error('Not a trip backup file');
-      if (await confirmBox('Replace everything in this app with the backup?', 'Replace')) { S.replaceState(data); toast('Backup restored'); }
+      if (![1, 2].includes(data.v)) throw new Error('Not a trip backup file');
+      if (await confirmBox('Replace everything in this app (all trips and settings) with the backup?', 'Replace')) { S.replaceState(data); toast('Backup restored'); }
     } catch (err) { toast('Couldn’t import: ' + err.message); }
   });
 }

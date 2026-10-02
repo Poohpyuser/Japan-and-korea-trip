@@ -1,6 +1,7 @@
 // Transit tab: journey planning via deep links, station cheat-sheets, passes, and legs you can drop into any day.
 import { h, clear, field, input, select, modal, confirmBox, toast, links, fmtDate, placePicker } from './util.js';
 import * as S from './store.js';
+import { extraFields } from './stopfields.js';
 import { STATIONS, TRANSIT_CARDS, CITIES, cityOptions } from './data.js';
 
 let country = sessionStorage.getItem('transitCountry') || 'JP';
@@ -78,6 +79,8 @@ export function openTransitForm({ stop, dayIdx, prefill } = {}) {
   const cost = input({ type: 'text', inputmode: 'decimal', value: stop?.cost || '', placeholder: 'Fare' });
   const day = select(st.days.map((d, i) => [i, `Day ${i + 1} · ${fmtDate(d.date)}`]), dayIdx ?? st.ui.day);
   const geo = { from: null, to: null };
+  const extra = extraFields(stop || { move: 'train' });
+  const extraTarget = {};
   const find = (which, inp) => {
     const holder = h('div');
     const m = modal(`Find ${which === 'from' ? 'departure' : 'arrival'} on the map`, placePicker({
@@ -91,18 +94,20 @@ export function openTransitForm({ stop, dayIdx, prefill } = {}) {
     field('To', h('div.row', to, h('button.btn.sm', { onclick: () => find('to', to) }, '📍'))),
     h('div.grid2', field('Departs', time), field('Fare', cost)),
     field('Line / train', line), h('div.grid2', field('Platform', platform), field('Ticket / seat', ticket)),
+    extra.el,
     h('p.muted.small', '📍 sets map coordinates so the leg shows on the Map tab.'));
   modal(stop ? 'Edit transit leg' : 'Add transit leg', body, [
     stop ? { label: 'Delete', danger: true, onclick: async () => {
       if (!(await confirmBox('Remove this transit leg?', 'Remove'))) return false;
       const d = st.days.find((d) => d.stops.includes(stop)); if (d) d.stops = d.stops.filter((x) => x !== stop); S.save();
     } } : null,
-    { label: 'Save', primary: true, onclick: () => {
+    { label: 'Save', primary: true, onclick: async () => {
+      try { await extra.apply(extraTarget); } catch (e) { toast(e.message); return false; }
       if (!from.value.trim() || !to.value.trim()) { toast('Enter where you’re going'); return false; }
       const tr = { ...t, from: from.value.trim(), to: to.value.trim(), line: line.value.trim(), platform: platform.value.trim(), ticket: ticket.value.trim() };
       if (geo.from) Object.assign(tr, { fromLat: geo.from.lat, fromLng: geo.from.lng });
       if (geo.to) Object.assign(tr, { toLat: geo.to.lat, toLng: geo.to.lng });
-      if (stop) { Object.assign(stop, { transit: tr, time: time.value, cost: cost.value.trim() }); S.sortStopsByTime(st.days.find((d) => d.stops.includes(stop))); S.save(); }
-      else { S.addStop(+day.value, { kind: 'transit', transit: tr, time: time.value, cost: cost.value.trim() }); toast('Saved to Day ' + (+day.value + 1)); }
+      if (stop) { Object.assign(stop, extraTarget, { transit: tr, time: time.value, cost: cost.value.trim() }); S.sortStopsByTime(st.days.find((d) => d.stops.includes(stop))); S.save(); }
+      else { S.addStop(+day.value, { kind: 'transit', transit: tr, time: time.value, cost: cost.value.trim(), ...extraTarget }); toast('Saved to Day ' + (+day.value + 1)); }
     } }].filter(Boolean));
 }

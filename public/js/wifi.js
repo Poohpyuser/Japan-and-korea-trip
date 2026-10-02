@@ -2,7 +2,7 @@
 import { h, clear, select, field, toast, overpass, elCoords, elName, distKm, fmtDist, links, timeAgo } from './util.js';
 import * as S from './store.js';
 import { WIFI_PROGRAMS } from './data.js';
-import { centerPicker, resolveCenter, layers } from './shared.js';
+import { centerPicker, resolveCenter, layers, bump } from './shared.js';
 
 let radius = 800;
 let includeChains = true;
@@ -48,6 +48,7 @@ export function renderWifi(root) {
       }).filter((r) => { const k = r.name + r.lat.toFixed(4); if (seen.has(k)) return false; seen.add(k); return true; })
         .sort((a, b) => (b.sure - a.sure) || a.km - b.km);
       layers.wifi = rows.map((r) => ({ lat: r.lat, lng: r.lng, name: r.name, sure: r.sure }));
+      bump();
       S.cache.set('wifi', { c, rows });
       show(rows, c);
     } catch (e) {
@@ -59,9 +60,9 @@ export function renderWifi(root) {
 
   root.replaceChildren(
     h('section.card',
-      h('h3', '📶 Free Wi-Fi near you'),
+      h('h3', 'Free Wi-Fi'),
       h('div.row.wrap', cp.el, field('Radius', rad), h('label.row', chains, h('span', 'Include chains')), h('button.btn.primary', { onclick: go }, 'Find Wi-Fi')),
-      h('p.muted.small', 'Tip: the results are also pinned on the Map tab. Results are saved so you can still see them offline.')),
+      h('p.muted.small', 'Results are pinned on the map above and saved so you can still see them offline.')),
     out,
     ...WIFI_PROGRAMS.map((g) => h('section.card', h('h3', g.title), h('ul', g.items.map((i) => h('li', i))))));
 
