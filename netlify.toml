@@ -1,0 +1,23 @@
+# Static site: no build step. Netlify just serves this folder over HTTPS
+# (HTTPS is required for the service worker, "install to home screen" and GPS).
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Robots-Tag = "noindex, nofollow"            # keep your private trip out of search engines
+    Permissions-Policy = "geolocation=(self), camera=(), microphone=()"
+
+# Make sure phones always pick up app updates promptly.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"

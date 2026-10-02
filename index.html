@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Trip Planner · Japan &amp; Korea</title>
+  <meta name="description" content="Plan, navigate and stay safe on a trip to Japan and Korea: itinerary, map, food list, transit, free Wi-Fi and disaster alerts.">
+  <meta name="theme-color" content="#e11d48">
+  <meta name="color-scheme" content="light dark">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Trip">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span aria-hidden="true">🗾</span> <b>Trip Planner</b></div>
+    <div id="offline" class="offline" hidden>Offline — saved data only</div>
+  </header>
+  <main></main>
+  <nav class="tabs" aria-label="Sections"></nav>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><p style="padding:1rem">This app needs JavaScript.</p></noscript>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
