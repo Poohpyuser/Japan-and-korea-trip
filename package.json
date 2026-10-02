@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Trip planner PWA (static, in public/) + one Netlify function that proxies Claude for the AI features.",
   "scripts": {
-    "test:fn": "node netlify/functions/ai.test.mjs"
+    "test:fn": "node tests/functions/ai.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

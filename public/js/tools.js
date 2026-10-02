@@ -4,10 +4,12 @@ import * as S from './store.js';
 import { PHRASES, ENTRY_LINKS, CITIES } from './data.js';
 import { getPass, setPass } from './ai.js';
 import { icon } from './icons.js';
+import { renderEat } from './eat.js';
+import { renderStay } from './stay.js';
+import { renderAI } from './ai.js';
 
 const CURRENCIES = ['JPY', 'KRW', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NZD', 'SGD', 'PHP', 'HKD', 'CNY', 'TWD', 'THB', 'MYR', 'IDR', 'INR', 'AED', 'CHF', 'MXN', 'BRL'];
 const EXP_CATS = { food: '🍜 Food', transport: '🚆 Transport', stay: '🏨 Stay', shop: '🛍️ Shopping', fun: '🎟️ Activities', other: '📦 Other' };
-let sub = sessionStorage.getItem('toolsTab') || 'budget';
 let rates = null;
 
 async function loadRates() {
@@ -22,13 +24,38 @@ async function loadRates() {
 const convert = (amt, from, to) => (rates?.v?.[from] && rates?.v?.[to] ? (amt / rates.v[from]) * rates.v[to] : null);
 const money = (n, cur) => (n == null ? '–' : new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: ['JPY', 'KRW', 'IDR'].includes(cur) ? 0 : 2 }).format(n));
 
+const PAGES = [
+  ['food', '🍜', 'Food list', 'Rate and save restaurants'],
+  ['stay', '🏨', 'Hotels', 'Search and save your stay'],
+  ['ai', '✨', 'AI assistant', 'Ask, import, plan'],
+  ['budget', '💴', 'Budget', 'Expenses and currency'],
+  ['packing', '🎒', 'Packing', 'Checklist'],
+  ['phrases', '💬', 'Phrases', 'Show to a local'],
+  ['settings', '⚙️', 'Settings', 'Theme, backup, emergency'],
+];
+const renderers = { budget, packing, phrases, settings };
+export const toolsPage = () => sessionStorage.getItem('toolsTab') || '';
+export const setToolsPage = (p) => sessionStorage.setItem('toolsTab', p || '');
+
+import { getTheme, setTheme } from './theme.js';
+
 export function renderTools(root) {
-  const tabs = [['budget', '💴 Budget'], ['packing', '🎒 Packing'], ['phrases', '💬 Phrases'], ['settings', '⚙️ Settings']];
+  const page = toolsPage();
+  if (!page) {
+    return root.replaceChildren(
+      h('section.profile', h('span.avatar', icon('user', 28)), h('div', h('b', S.get().settings.names[0] || 'Me'), h('small', `${S.get().trips.length} trip${S.get().trips.length === 1 ? '' : 's'}`))),
+      h('div.tilegrid', PAGES.map(([k, emoji, title, sub]) => h('button.tile2', { onclick: () => { setToolsPage(k); S.save(); } }, h('span.t2e', emoji), h('b', title), h('small', sub)))));
+  }
+  const meta = PAGES.find(([k]) => k === page);
+  const body = h('div');
   root.replaceChildren(
-    h('div.seg', tabs.map(([k, l]) => h('button', { class: sub === k ? 'on' : '', onclick: () => { sub = k; sessionStorage.setItem('toolsTab', k); S.save(); } }, l))),
-    { budget, packing, phrases, settings }[sub](),
-  );
-  if (sub === 'budget' && (!rates || Date.now() - rates.at > 6 * 36e5)) loadRates();
+    h('div.pagehead', h('button.circle', { 'aria-label': 'Back', onclick: () => { setToolsPage(''); S.save(); } }, icon('back', 18)), h('b', meta?.[2] || '')),
+    body);
+  if (page === 'food') renderEat(body);
+  else if (page === 'stay') renderStay(body);
+  else if (page === 'ai') renderAI(body, {});
+  else body.append(renderers[page]());
+  if (page === 'budget' && (!rates || Date.now() - rates.at > 6 * 36e5)) loadRates();
 }
 
 // ---------- budget ----------
@@ -142,6 +169,8 @@ function settings() {
   });
   const fileInp = h('input', { type: 'file', accept: 'application/json', hidden: true, onchange: importFile });
   return h('div.stack',
+    h('section.card', h('h3', 'Appearance'),
+      field('Theme', select([['dark', 'Dark (default)'], ['light', 'Light'], ['auto', 'Match my phone']], getTheme(), { onchange: (ev) => setTheme(ev.target.value) }))),
     h('section.card', h('h3', 'Travellers & money'),
       h('div.grid2', field('Traveller 1 (you)', input({ type: 'text', value: s.names[0], oninput: (ev) => { s.names[0] = ev.target.value.trim() || 'Me'; s.who = s.names[0]; S.save(false); } })),
         field('Traveller 2', input({ type: 'text', value: s.names[1], oninput: (ev) => { s.names[1] = ev.target.value.trim() || 'Sister'; S.save(false); } }))),

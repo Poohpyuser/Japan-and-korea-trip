@@ -77,6 +77,7 @@ const chat = { msgs: [], busy: false };
 const imp = { text: '', files: [], results: null, summary: '', needs: '', busy: false };
 const plan = { result: null, dayIdx: null, busy: false };
 let notConfigured = false;
+let pendingAsk = null;
 
 export function openAI(opts = {}) {
   const body = h('div.ai-modal');
@@ -88,6 +89,7 @@ export function renderAI(root, opts = {}) {
   if (opts.mode) tab = { planday: 'plan', extract: 'import', chat: 'ask' }[opts.mode] || tab;
   if (opts.dayIdx != null) plan.dayIdx = opts.dayIdx;
   if (opts.text != null) { imp.text = opts.text; tab = 'import'; }
+  if (opts.ask) { pendingAsk = opts.ask; tab = 'ask'; }
   const st = S.get();
   if (plan.dayIdx == null || plan.dayIdx >= st.days.length) plan.dayIdx = st.ui.day;
 
@@ -130,6 +132,7 @@ function askView(draw) {
     } catch (e) { chat.msgs.pop(); chat.busy = false; return handleErr(e, draw); }
     chat.busy = false; draw();
   };
+  if (pendingAsk) { const q = pendingAsk; pendingAsk = null; setTimeout(() => send(q), 0); }
   return h('div.stack',
     box,
     chat.msgs.length ? null : h('div.chips.wrap', QUICK.map((q) => h('button.chip', { onclick: () => send(q) }, q))),

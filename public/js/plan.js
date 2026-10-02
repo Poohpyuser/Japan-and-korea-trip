@@ -180,7 +180,7 @@ function flightsCard() {
       h('div.f-end.r', h('b', f.toCode || '—'), h('small', f.toCity), h('span', f.arrTime || '')))) : h('p.muted.small', 'Add your flights so times, codes and calendar alarms are one tap away.'));
 }
 
-function editFlight(f) {
+export function editFlight(f) {
   const st = S.get();
   const o = f || { id: uid() };
   const F = (k, attrs = {}) => input({ type: 'text', value: o[k] || '', ...attrs });
@@ -369,7 +369,7 @@ function editStop(s, day) {
     } }]);
 }
 
-function addNote(dayIdx) {
+export function addNote(dayIdx) {
   const text = h('textarea', { rows: 3, placeholder: 'Reminder, booking number, idea…' });
   const time = input({ type: 'time' });
   modal('Add note', h('div.stack', field('Time (optional)', time), field('Note', text)), [{

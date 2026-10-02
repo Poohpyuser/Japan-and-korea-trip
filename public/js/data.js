@@ -201,3 +201,33 @@ export const WIFI_PROGRAMS = [
   ] },
 ];
 
+
+// Destinations offered when creating a trip. `city` links to CITIES so days get weather, safety and search centres.
+export const DESTINATIONS = [
+  { name: 'Japan', sub: '', type: 'Country', city: 'tokyo' },
+  { name: 'South Korea', sub: '', type: 'Country', city: 'seoul' },
+  { name: 'Tokyo', sub: 'Tokyo Prefecture, Japan', type: 'City', city: 'tokyo' },
+  { name: 'Kyoto', sub: 'Kyoto Prefecture, Japan', type: 'City', city: 'kyoto' },
+  { name: 'Osaka', sub: 'Osaka Prefecture, Japan', type: 'City', city: 'osaka' },
+  { name: 'Seoul', sub: 'South Korea', type: 'City', city: 'seoul' },
+  { name: 'Busan', sub: 'South Korea', type: 'City', city: 'busan' },
+  { name: 'Jeju', sub: 'Jeju Island, South Korea', type: 'Region', city: 'jeju' },
+  { name: 'Hakone', sub: 'Kanagawa, Japan', type: 'Region', city: 'hakone' },
+  { name: 'Nara', sub: 'Nara Prefecture, Japan', type: 'City', city: 'nara' },
+  { name: 'Hiroshima', sub: 'Japan', type: 'City', city: 'hiroshima' },
+  { name: 'Fukuoka', sub: 'Japan', type: 'City', city: 'fukuoka' },
+  { name: 'Sapporo', sub: 'Hokkaido, Japan', type: 'City', city: 'sapporo' },
+  { name: 'Okinawa', sub: 'Japan', type: 'Region', city: 'okinawa' },
+  { name: 'Kanazawa', sub: 'Ishikawa, Japan', type: 'City', city: 'kanazawa' },
+  { name: 'Gyeongju', sub: 'South Korea', type: 'City', city: 'gyeongju' },
+];
+
+// Tap-to-start ideas on Home. `ask` is sent to the AI assistant.
+export const IDEAS = [
+  { emoji: '🍜', title: 'Tokyo ramen crawl', sub: '5 bowls worth the queue', ask: 'Plan a ramen crawl in Tokyo: 5 distinct styles (tonkotsu, shoyu, tsukemen, miso, vegetarian), with the best neighbourhoods and what to order.', color: '#d9724a' },
+  { emoji: '⛩️', title: 'Kyoto without the crowds', sub: 'Early starts, quiet temples', ask: 'Suggest a one-day Kyoto itinerary that avoids the crowds: early-morning temples, quiet gardens and a calm lunch.', color: '#3f7cb0' },
+  { emoji: '🥩', title: 'Seoul food night', sub: 'BBQ, street food, cafés', ask: 'Plan an evening of Korean food in Seoul: BBQ, street food and a dessert café, close together, with Naver Map search names.', color: '#c0558a' },
+  { emoji: '🌧️', title: 'Rainy-day backups', sub: 'Indoor ideas for Osaka & Tokyo', ask: 'Give me 8 great rainy-day indoor activities in Osaka and Tokyo with rough costs and booking tips.', color: '#6b5bc4' },
+  { emoji: '🏝️', title: 'Jeju in 2 days', sub: 'Coast, cafés and hiking', ask: 'Plan 2 days on Jeju Island with a rental car: coast, cafés and one easy hike, with driving times.', color: '#2f8f83' },
+  { emoji: '🐟', title: 'Busan seafood day', sub: 'Markets, beaches, temples', ask: 'Plan one day in Busan around seafood: Jagalchi market, a coastal temple and a sunset spot, with transit.', color: '#e0a94e' },
+];

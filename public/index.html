@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Trip Planner · Japan &amp; Korea</title>
   <meta name="description" content="Plan, navigate and stay safe on a trip to Japan and Korea: itinerary, map, food list, transit, free Wi-Fi, disaster alerts and an AI assistant.">
-  <meta name="theme-color" content="#1b4b7a">
+  <meta name="theme-color" content="#262b33">
   <meta name="color-scheme" content="light dark">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -19,9 +20,8 @@
 </head>
 <body>
   <header class="top">
-    <div class="brand"><span aria-hidden="true">🗾</span><b>Trip Planner</b></div>
+    <div class="brand"><b>trip<span>planner</span></b></div>
     <button id="trip-btn" class="tripbtn" aria-label="Switch trip"><span id="trip-name">My trip</span><span class="caret">▾</span></button>
-    <button id="new-trip" class="plusbtn" aria-label="New trip">＋</button>
     <div id="offline" class="offline" hidden>Offline</div>
   </header>
   <div id="alarm" class="alarm" role="alert" hidden></div>

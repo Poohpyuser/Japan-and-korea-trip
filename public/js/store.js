@@ -26,19 +26,19 @@ const defaultSettings = () => ({
   emergency: { name: '', blood: '', allergies: '', meds: '', contact: '', embassy: '' },
 });
 
-const fresh = () => { const t = newTripObj(); return { v: 2, trips: [t], activeId: t.id, settings: defaultSettings(), ui: { day: 0, tab: 'plan' } }; };
+const fresh = () => { const t = newTripObj(); return { v: 2, trips: [t], activeId: t.id, settings: defaultSettings(), ui: { day: 0, tab: 'home' } }; };
 
 function migrate(raw) {
   if (raw?.v === 2 && Array.isArray(raw.trips) && raw.trips.length) {
     raw.settings = { ...defaultSettings(), ...raw.settings };
     raw.trips = raw.trips.map((t) => newTripObj(t));
     if (!raw.trips.some((t) => t.id === raw.activeId)) raw.activeId = raw.trips[0].id;
-    raw.ui = { day: 0, tab: 'plan', ...raw.ui };
+    raw.ui = { day: 0, tab: 'home', ...raw.ui };
     return raw;
   }
   if (raw?.v === 1) { // first version stored a single trip at the top level
     const t = newTripObj({ ...raw.trip, days: raw.days || [], places: raw.places || [], expenses: raw.expenses || [], packing: raw.packing || undefined });
-    return { v: 2, trips: [t], activeId: t.id, settings: { ...defaultSettings(), ...raw.settings }, ui: { day: raw.ui?.day || 0, tab: 'plan' } };
+    return { v: 2, trips: [t], activeId: t.id, settings: { ...defaultSettings(), ...raw.settings }, ui: { day: raw.ui?.day || 0, tab: 'home' } };
   }
   return null;
 }
@@ -144,6 +144,16 @@ export function setDates(start, end, defaultCity = 'tokyo') {
   // Keep stops of days that fell outside the new range by parking them on the last day.
   for (const d of old.values()) if (!t.days.some((x) => x.date === d.date) && d.stops.length) t.days.at(-1).stops.push(...d.stops);
   state.ui.day = Math.min(state.ui.day, t.days.length - 1);
+  save();
+}
+
+// Spread a list of city keys evenly over the trip's days (first cities get the extra day).
+export function setCitiesEven(keys) {
+  const t = activeTrip();
+  if (!keys.length || !t.days.length) return;
+  const n = t.days.length, base = Math.floor(n / keys.length);
+  let extra = n % keys.length, i = 0;
+  keys.forEach((k) => { const len = base + (extra-- > 0 ? 1 : 0); for (let j = 0; j < len && i < n; j++) t.days[i++].city = k; });
   save();
 }
 

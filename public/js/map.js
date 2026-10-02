@@ -33,6 +33,8 @@ let showLabels = true;
 let activePanel = null;
 let journey = { i: 0, busy: false, playing: false, dayKey: '' };
 let pendingFocus = null;
+let pendingPanel = null;
+document.addEventListener('open-panel', (e) => { pendingPanel = e.detail; });
 let geomSig = '';
 
 const dot = (cls, text = '') => L.divIcon({ className: '', html: `<div class="pin ${cls}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -12] });
@@ -58,6 +60,7 @@ export function renderMap(root) {
   refresh(true);
   setTimeout(() => map.invalidateSize(), 60);
   if (pendingFocus) { const f = pendingFocus; pendingFocus = null; focusStop(f); }
+  if (pendingPanel) { const k = pendingPanel; pendingPanel = null; if (PANELS[k]) openPanel(k); }
 }
 
 function build(root) {

@@ -11,11 +11,11 @@ API key off the phone for the AI features.
 
 | Tab | What it does |
 | --- | --- |
-| **Plan** | Hero header with D-day and cover photo · up to **90-day** trips · day chips + date jump · flights · booking-document vault · timeline cards (category colours, move mode, alarm, attachments, Directions / Maps / Calendar / Attach / Edit / Delete) · city plan for long trips · share link · .ics export |
-| **Map** | Full-screen map with **English labels** (toggle to local) · tap anywhere to name/save/add to a day or search food, Wi-Fi, help there · bottom dock: **Route** (smart actions, optimize order, leg times) · **Food** · **Wi-Fi** · **Transit** (planner, station cheat-sheets, passes) · **Safety** (quakes, weather risk, hospitals, emergency card) · **AI** · ▶ **Play** your day with a pixel-art traveller that walks, drives or rides the real road/foot route |
-| **Eat** | Your food list with Tabelog-style 1–5 ratings for both travellers + Tabelog/Google/Naver scores you type in; nearby finder |
-| **AI** | Ask about your trip · **From a reel** (paste caption / screenshots → places → one tap to save) · **Plan a day** (drafts a timed day, you pick what to add) |
-| **Tools** | Budget + yen/won converter + 50/50 settle-up · packing · tap-to-show phrases · hotel addresses · backup/restore · notifications |
+| **Home** | Wanderlog-style landing page: create a trip, your trips (with D-day), quick actions, travel-alert card, idea cards that start an AI chat |
+| **＋ (centre)** | Create menu: **Plan a trip** (pick one or several destinations → dates → cities split automatically), add a place / transit / note / flight to the current day, Ask AI, **Import from anywhere**, Find a hotel |
+| **Trip** | Cover header with D-day · up to **90-day** trips · day chips + date jump · flights · booking-document vault · timeline cards (category colours, move mode, alarm, attachments, Directions / Maps / Calendar / Attach / Edit / Delete) · city plan · share link · .ics export |
+| **Map** | Full-screen map with **English labels** · tap anywhere to name/save/add or search food, Wi-Fi, help there · dock: **Route** (smart actions, optimize order, leg times) · **Food** · **Wi-Fi** · **Transit** · **Safety** · **AI** · ▶ **Play** your day with a pixel-art traveller |
+| **Me** | Hub: **Food list** (Tabelog-style ratings) · **Hotels** (Booking / Agoda / Google Hotels / Airbnb pre-filled, recent searches, save your stay) · **AI assistant** (ask, from a reel, plan a day) · Budget · Packing · Phrases · Settings (dark/light theme, backup, emergency card) |
 
 Multiple trips: tap the trip name in the top bar (switch / edit / delete with a double tap) or **＋** for a new one.
 
@@ -47,7 +47,7 @@ The AI lists the places with confidence levels; you tick what to save, then drop
 npm install
 npx netlify dev          # serves public/ + the AI function (needs ANTHROPIC_API_KEY in a .env)
 # or just the static app (no AI):  python3 -m http.server -d public 8000
-npm run test:fn          # unit tests for the AI function (no network or key needed)
+npm run test:fn          # unit tests (tests/functions) for the AI function (no network or key needed)
 ```
 
 ## Data sources & limits

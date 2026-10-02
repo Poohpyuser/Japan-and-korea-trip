@@ -1,6 +1,6 @@
 // Offline support. App files: stale-while-revalidate (instant, updates in the background).
 // Map tiles: cached as you browse (capped). Live API calls (including /api/ai) are never cached.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = `shell-${VERSION}`;
 const TILES = `tiles-${VERSION}`;
 const MAX_TILES = 500;
@@ -10,7 +10,7 @@ const ASSETS = [
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
   'vendor/leaflet/images/marker-icon.png', 'vendor/leaflet/images/marker-icon-2x.png', 'vendor/leaflet/images/marker-shadow.png', 'vendor/leaflet/images/layers.png',
   'js/main.js', 'js/util.js', 'js/store.js', 'js/data.js', 'js/shared.js', 'js/icons.js', 'js/docs.js', 'js/ics.js', 'js/stopfields.js', 'js/journey.js',
-  'js/plan.js', 'js/map.js', 'js/eat.js', 'js/transit.js', 'js/wifi.js', 'js/safety.js', 'js/ai.js', 'js/tools.js',
+  'js/home.js', 'js/create.js', 'js/stay.js', 'js/theme.js', 'js/plan.js', 'js/map.js', 'js/eat.js', 'js/transit.js', 'js/wifi.js', 'js/safety.js', 'js/ai.js', 'js/tools.js',
 ];
 
 self.addEventListener('install', (e) => {

@@ -1,6 +1,6 @@
 // Run: npm run test:fn   (no network or API key needed: the Anthropic client is faked)
 import assert from 'node:assert/strict';
-import { createHandler } from './ai.mjs';
+import { createHandler } from '../../netlify/functions/ai.mjs';
 
 const calls = [];
 const fake = {

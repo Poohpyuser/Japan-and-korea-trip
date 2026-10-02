@@ -2,23 +2,24 @@
 import { $, $$, h, modal, toast, unpackShare, confirmBox, fmtDate, pad, todayISO } from './util.js';
 import * as S from './store.js';
 import { icon } from './icons.js';
-import { renderPlan, tripForm } from './plan.js';
+import { renderPlan } from './plan.js';
 import { renderMap } from './map.js';
-import { renderEat } from './eat.js';
-import { renderAI, openAI } from './ai.js';
+import { renderHome } from './home.js';
+import { openAI } from './ai.js';
 import { checkSafety } from './safety.js';
-import { renderTools } from './tools.js';
+import { renderTools, toolsPage, setToolsPage } from './tools.js';
+import { openCreate, destinationFlow } from './create.js';
+import { applyTheme } from './theme.js';
 
 const TABS = [
-  ['plan', 'Plan', 'plan', renderPlan], ['map', 'Map', 'map', renderMap], ['eat', 'Eat', 'eat', renderEat],
-  ['ai', 'AI', 'ai', (root) => renderAI(root, {})], ['tools', 'Tools', 'tools', renderTools],
+  ['home', 'Home', 'home', renderHome], ['plan', 'Trip', 'plan', renderPlan], ['map', 'Map', 'map', renderMap], ['tools', 'Me', 'user', renderTools],
 ];
-// These keep their own in-progress state (chat, forms), so they render when opened, not on every data change.
-const STICKY = new Set(['ai']);
+// The AI chat keeps its own in-progress state, so it renders when opened, not on every data change.
+const isSticky = (tab) => tab === 'tools' && toolsPage() === 'ai';
 
 function show(tab, { fromState = false } = {}) {
   const st = S.get();
-  if (!TABS.some(([k]) => k === tab)) tab = 'plan';
+  if (!TABS.some(([k]) => k === tab)) tab = 'home';
   const changed = st.ui.tab !== tab;
   st.ui.tab = tab;
   $$('.view').forEach((v) => { v.hidden = v.id !== 'view-' + tab; });
@@ -27,16 +28,16 @@ function show(tab, { fromState = false } = {}) {
   const [, label, , render] = TABS.find(([k]) => k === tab);
   document.title = `${label} · ${st.trip.name}`;
   $('#trip-name').textContent = st.trip.name;
-  if (STICKY.has(tab) && fromState && !changed) return;
+  if (isSticky(tab) && fromState && !changed) return;
   try { render($('#view-' + tab)); } catch (e) { console.error(e); $('#view-' + tab).replaceChildren(h('div.card', h('p.warn', `Something went wrong drawing this tab: ${e.message}`))); }
   if (changed) { window.scrollTo(0, 0); S.save(false); }
 }
 
 function buildShell() {
-  $('nav.tabs').append(...TABS.map(([k, label, ic]) => h('button', { dataset: { tab: k }, onclick: () => show(k) }, icon(ic, 22), h('span', label), k === 'map' ? h('i.dot', { id: 'safety-dot' }) : null)));
+  const btn = ([k, label, ic]) => h('button', { dataset: { tab: k }, onclick: () => show(k) }, icon(ic, 22), h('span', label), k === 'map' ? h('i.dot', { id: 'safety-dot' }) : null);
+  $('nav.tabs').append(btn(TABS[0]), btn(TABS[1]), h('button.fab', { 'aria-label': 'Create', onclick: openCreate }, icon('plus', 28)), btn(TABS[2]), btn(TABS[3]));
   $('main').append(...TABS.map(([k]) => h('section.view', { id: 'view-' + k, hidden: true, class: k === 'map' ? 'full' : '' })));
   $('#trip-btn').addEventListener('click', tripsSheet);
-  $('#new-trip').addEventListener('click', newTripSheet);
 }
 
 // ---------- trips ----------
@@ -44,7 +45,7 @@ function tripsSheet() {
   const st = S.get();
   const list = h('div.stack');
   const armed = new Set();
-  const m = modal('My trips', h('div.stack', list, h('button.btn.primary', { onclick: () => { m.close(); newTripSheet(); } }, icon('plus', 18), 'New trip')));
+  const m = modal('My trips', h('div.stack', list, h('button.btn.primary', { onclick: () => { m.close(); destinationFlow(); } }, icon('plus', 18), 'New trip')));
   const draw = () => {
     list.replaceChildren(...st.trips.map((t) => {
       const n = t.days.reduce((a, d) => a + d.stops.length, 0);
@@ -60,14 +61,6 @@ function tripsSheet() {
     }));
   };
   draw();
-}
-
-function newTripSheet() {
-  const form = tripForm({});
-  modal('New trip', form.el, [{
-    label: 'Create', primary: true,
-    onclick: () => { const v = form.read(); if (!v) return false; S.createTrip(v); toast('Trip created'); },
-  }]);
 }
 
 async function importShared(code) {
@@ -122,11 +115,13 @@ function init() {
   buildShell();
   S.subscribe(() => show(S.get().ui.tab, { fromState: true }));
   document.addEventListener('show-on-map', () => show('map'));
+  document.addEventListener('goto', (e) => { const { tab, sub } = e.detail; if (tab === 'tools') setToolsPage(sub || ''); window.scrollTo(0, 0); show(tab); });
   document.addEventListener('edit-trip', () => { show('plan'); setTimeout(() => $('#view-plan .hero .btn')?.click(), 50); });
 
   const params = new URLSearchParams(location.search);
   const m = location.hash.match(/^#share=(.+)$/);
-  show(S.get().ui.tab || 'plan');
+  applyTheme();
+  show(S.get().ui.tab || 'home');
   if (m) { history.replaceState(null, '', location.pathname); importShared(m[1]); }
   // Android "Share → Trip Planner" from Instagram/TikTok/Maps lands here (see share_target in the manifest).
   if (params.has('share')) {
